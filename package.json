@@ -100,5 +100,10 @@
     "*.{js,jsx}": [
       "eslint --fix"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "re2": "^1.27.2"
+    }
   }
 }
