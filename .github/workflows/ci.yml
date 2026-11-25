@@ -1,0 +1,43 @@
+name: CI
+
+# Kapan jalan: setiap push atau pull request ke branch v1
+on:
+  push:
+    branches: [v1]
+  pull_request:
+    branches: [v1]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest   # komputer Linux pinjaman GitHub
+
+    # Alamat palsu — CI tidak perlu database asli
+    env:
+      DATABASE_URL: postgres://user:pass@localhost:5432/dummy
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: dummy-secret-for-ci
+
+    steps:
+      - name: Ambil kode dari repo
+        uses: actions/checkout@v4
+
+      - name: Pasang pnpm
+        uses: pnpm/action-setup@v4   # versinya otomatis dibaca dari package.json
+
+      - name: Pasang Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc  # isinya "18"
+          cache: pnpm                # biar run berikutnya lebih cepat
+
+      - name: Install library
+        run: pnpm install --frozen-lockfile
+
+      - name: Siapkan Prisma (penghubung ke database)
+        run: pnpm db:generate
+
+      - name: Cek kerapian kode (lint)
+        run: pnpm lint
+
+      - name: Coba build aplikasi
+        run: pnpm build
